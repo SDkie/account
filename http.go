@@ -38,7 +38,7 @@ func decodeResponse(resp *http.Response, result interface{}) error {
 			return err
 		}
 
-		err = fmt.Errorf("http request failed with err: %s", errResponse.ErrorMessage)
+		err = fmt.Errorf("http request failed with err: %s and httpStatus:%s", errResponse.ErrorMessage, resp.Status)
 		log.Println(err)
 		return err
 	}

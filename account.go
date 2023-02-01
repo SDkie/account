@@ -134,7 +134,7 @@ func (c *Client) Delete(id string, version int) error {
 	}
 
 	if httpResp.StatusCode != http.StatusNoContent {
-		err := fmt.Errorf("request failed with httpResp Status: %s", httpResp.Status)
+		err := fmt.Errorf("delete request failed with httpStatus: %s", httpResp.Status)
 		log.Println(err)
 		return err
 	}
@@ -191,7 +191,7 @@ func (c *Client) Health() (*HealthResponse, error) {
 
 	httpResp, err := http.Get(url)
 	if err != nil {
-		log.Printf("error from http.Get: %s\n", err)
+		log.Printf("http.Get request failed with err: %s\n", err)
 		return nil, err
 	}
 

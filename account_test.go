@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -39,7 +40,7 @@ func TestMain(m *testing.M) {
 			continue
 		}
 
-		// Run the tests, API is healthy
+		// API server is healthy, we are ready to run tests
 		os.Exit(m.Run())
 	}
 
@@ -57,6 +58,28 @@ func TestCreate(t *testing.T) {
 
 	account := createTestAccount(t, client)
 	cleanupTestAccount(t, client, account.ID)
+}
+
+func TestCreateWithoutID(t *testing.T) {
+	t.Log("Given the need to test the account's Create() API Without ID")
+	t.Logf("\tWhen creating client of accounts lib")
+	client, err := account.New()
+	if err != nil {
+		t.Fatalf("\t%s\tShould not respond with error: %s", failed, err)
+	}
+
+	account := generateRandomAccountData()
+	account.ID = ""
+
+	t.Logf("\tWhen checking the response of Create() API for AccountID: %s", account.ID)
+	_, err = client.Create(account)
+	if err == nil {
+		t.Fatalf("\t%s\tShould respond with an error", failed)
+	}
+
+	if !strings.Contains(err.Error(), "validation failure list:\nvalidation failure list:\nid in body is required") {
+		t.Fatalf("\t%s\tShould respond with /'id in body is required/' msg", failed)
+	}
 }
 
 func TestFetchAfterCreate(t *testing.T) {
@@ -99,6 +122,39 @@ func TestDeleteAfterCreate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("\t%s\tShould not respond with error:%s", failed, err)
 	}
+}
+
+func TestListAfterCreate(t *testing.T) {
+	t.Log("Given the need to test the account's List() API")
+	t.Logf("\tWhen creating client of accounts lib")
+	client, err := account.New()
+	if err != nil {
+		t.Fatalf("\t%s\tShould not respond with error: %s", failed, err)
+	}
+
+	account := createTestAccount(t, client)
+	defer cleanupTestAccount(t, client, account.ID)
+
+	t.Logf("\tWhen checking the response of List() API")
+	accounts, err := client.List("last")
+	if err != nil {
+		t.Fatalf("\t%s\tShould not respond with error:%s", failed, err)
+	}
+
+	if len(accounts.Accounts) == 0 {
+		t.Fatalf("\t%s\tShould not respond with empty Accounts", failed)
+	}
+
+	for _, acc := range accounts.Accounts {
+		if acc.ID == account.ID {
+			if !reflect.DeepEqual(acc, account) {
+				t.Fatalf("\t%s\tShould exactly match test account with one of the element in List()", failed)
+			}
+			return
+		}
+	}
+
+	t.Fatalf("\t%s\tShould match test account.ID with one of the element in List()", failed)
 }
 
 func TestListAfterDelete(t *testing.T) {
@@ -173,6 +229,6 @@ func createTestAccount(t *testing.T, client *account.Client) account.AccountData
 func cleanupTestAccount(t *testing.T, client *account.Client, id string) {
 	err := client.Delete(id, 0)
 	if err != nil {
-		t.Logf("error deleting test account: %s", err)
+		t.Logf("error in deleting test account: %s", err)
 	}
 }
