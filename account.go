@@ -12,7 +12,6 @@ const (
 	CREATE_PATH = "%s/v1/organisation/accounts"
 	FETCH_PATH  = "%s/v1/organisation/accounts/%s"
 	DELETE_PATH = "%s/v1/organisation/accounts/%s?version=%d"
-	LIST_PATH   = "%s/v1/organisation/accounts"
 	HEALTH_PATH = "%s/v1/health"
 )
 
@@ -140,45 +139,6 @@ func (c *Client) Delete(id string, version int) error {
 	}
 
 	return nil
-}
-
-// ListResponse is responded by List API
-type ListResponse struct {
-	Accounts []AccountData `json:"data"`
-	Links    struct {
-		First string `json:"first"`
-		Last  string `json:"last"`
-		Prev  string `json:"prev"`
-		Self  string `json:"self"`
-	} `json:"links"`
-}
-
-// List sends request to List accounts based on pageNo
-// pageNo can be 0, 1, 2, 3... or first, last, prev, self
-// pageNo can also be empty string
-func (c *Client) List(pageNo string) (*ListResponse, error) {
-	rURL := fmt.Sprintf(LIST_PATH, c.serverURL)
-	if pageNo != "" {
-		params := url.Values{}
-		params.Add("page[number]", pageNo)
-		params.Encode()
-
-		rURL = fmt.Sprintf("%s?%s", rURL, params.Encode())
-	}
-
-	httpResp, err := http.Get(rURL)
-	if err != nil {
-		log.Printf("http.Get request failed with err: %s\n", err)
-		return nil, err
-	}
-
-	var response ListResponse
-	err = decodeResponse(httpResp, &response)
-	if err != nil {
-		return nil, err
-	}
-
-	return &response, nil
 }
 
 type HealthResponse struct {

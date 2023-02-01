@@ -108,60 +108,6 @@ func TestDeleteAfterCreate(t *testing.T) {
 	}
 }
 
-func TestListAfterCreate(t *testing.T) {
-	t.Log("Given the need to test the account's List() API")
-
-	client := getAccountsClient(t)
-	account := createTestAccount(t, client)
-	defer cleanupTestAccount(t, client, account.ID)
-
-	t.Logf("\tWhen checking the response of List() API")
-	accounts, err := client.List("last")
-	if err != nil {
-		t.Fatalf("\t%s\tShould not respond with error:%s", failed, err)
-	}
-
-	if len(accounts.Accounts) == 0 {
-		t.Fatalf("\t%s\tShould not respond with empty Accounts", failed)
-	}
-
-	for _, acc := range accounts.Accounts {
-		if acc.ID == account.ID {
-			if !reflect.DeepEqual(acc, account) {
-				t.Fatalf("\t%s\tShould exactly match test account with one of the element in List()", failed)
-			}
-			return
-		}
-	}
-
-	t.Fatalf("\t%s\tShould match test account.ID with one of the element in List()", failed)
-}
-
-func TestListAfterDelete(t *testing.T) {
-	t.Log("Given the need to test the account's List() API")
-
-	client := getAccountsClient(t)
-	account := createTestAccount(t, client)
-
-	t.Logf("\tWhen checking the response of Delete() API for AccountID: %s", account.ID)
-	err := client.Delete(account.ID, 0)
-	if err != nil {
-		t.Fatalf("\t%s\tShould not respond with error:%s", failed, err)
-	}
-
-	t.Logf("\tWhen checking the response of List() API")
-	accounts, err := client.List("last")
-	if err != nil {
-		t.Fatalf("\t%s\tShould not respond with error:%s", failed, err)
-	}
-
-	for _, acc := range accounts.Accounts {
-		if acc.ID == account.ID {
-			t.Fatalf("\t%s\tShould not match test account.ID with one of the element in List()", failed)
-		}
-	}
-}
-
 func getAccountsClient(t *testing.T) *account.Client {
 	t.Logf("\tWhen creating client of account lib")
 	client, err := account.New()
