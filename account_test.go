@@ -114,7 +114,7 @@ func TestDeleteAfterCreate(t *testing.T) {
 func TestListAfterDelete(t *testing.T) {
 	t.Log("Given the need to test the account's List() API")
 	t.Logf("\tWhen creating client of accounts lib")
-	client, err := accounts.New()
+	client, err := account.New()
 	if err != nil {
 		t.Fatalf("\t%s\tShould not respond with error: %s", failed, err)
 	}
