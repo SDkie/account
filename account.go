@@ -141,6 +141,7 @@ func (c *Client) Delete(id string, version int) error {
 	return nil
 }
 
+// HealthResponse is the return type for Health API
 type HealthResponse struct {
 	Status string `json:"status"`
 }

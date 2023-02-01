@@ -108,6 +108,25 @@ func TestDeleteAfterCreate(t *testing.T) {
 	}
 }
 
+func TestFetchAfterDelete(t *testing.T) {
+	t.Log("Given the need to test the account's Delete() API")
+
+	client := getAccountsClient(t)
+	account := createTestAccount(t, client)
+
+	t.Logf("\tWhen checking the response of Delete() API for AccountID: %s", account.ID)
+	err := client.Delete(account.ID, 0)
+	if err != nil {
+		t.Fatalf("\t%s\tShould not respond with error:%s", failed, err)
+	}
+
+	t.Logf("\tWhen checking the response of Fetch() API for AccountID: %s", account.ID)
+	_, err = client.Fetch(account.ID)
+	if err == nil {
+		t.Fatalf("\t%s\tShould fail with err", failed)
+	}
+}
+
 func getAccountsClient(t *testing.T) *account.Client {
 	t.Logf("\tWhen creating client of account lib")
 	client, err := account.New()
