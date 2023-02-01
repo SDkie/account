@@ -30,7 +30,7 @@ type errorResponse struct {
 }
 
 func decodeResponse(resp *http.Response, result interface{}) error {
-	if resp.StatusCode >= http.StatusBadRequest {
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		var errResponse errorResponse
 		err := json.NewDecoder(resp.Body).Decode(&errResponse)
 		if err != nil {
