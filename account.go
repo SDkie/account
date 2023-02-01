@@ -4,11 +4,35 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
+	"os"
 )
 
 const (
 	CREATE_PATH = "%s/v1/organisation/accounts"
 )
+
+type Client struct {
+	serverURL string
+}
+
+// New returns *Client using ACCOUNTS_API_URL env variable
+func New() (*Client, error) {
+	rURL := os.Getenv("ACCOUNTS_API_URL")
+	if rURL == "" {
+		err := fmt.Errorf("env ACCOUNTS_API_URL is required")
+		log.Println(err)
+		return nil, err
+	}
+
+	_, err := url.ParseRequestURI(rURL)
+	if err != nil {
+		log.Printf("Parsing ACCOUNTS_API_URL failed with err: %s", err)
+		return nil, err
+	}
+
+	return &Client{serverURL: rURL}, nil
+}
 
 // AccountData is the structure for an account
 type AccountData struct {
@@ -47,8 +71,8 @@ type AccountResponse struct {
 }
 
 // Create sends request for Creating Account
-func Create(data AccountData) (*AccountResponse, error) {
-	url := fmt.Sprintf(CREATE_PATH, "http://localhost:8080")
+func (c *Client) Create(data AccountData) (*AccountResponse, error) {
+	url := fmt.Sprintf(CREATE_PATH, c.serverURL)
 
 	reader, err := encodeRequest(data)
 	if err != nil {
