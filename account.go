@@ -13,6 +13,7 @@ const (
 	FETCH_PATH  = "%s/v1/organisation/accounts/%s"
 	DELETE_PATH = "%s/v1/organisation/accounts/%s?version=%d"
 	LIST_PATH   = "%s/v1/organisation/accounts"
+	HEALTH_PATH = "%s/v1/health"
 )
 
 type Client struct {
@@ -172,6 +173,29 @@ func (c *Client) List(pageNo string) (*ListResponse, error) {
 	}
 
 	var response ListResponse
+	err = decodeResponse(httpResp, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return &response, nil
+}
+
+type HealthResponse struct {
+	Status string `json:"status"`
+}
+
+// Health returns the health of the API server
+func (c *Client) Health() (*HealthResponse, error) {
+	url := fmt.Sprintf(HEALTH_PATH, c.serverURL)
+
+	httpResp, err := http.Get(url)
+	if err != nil {
+		log.Printf("error from http.Get: %s\n", err)
+		return nil, err
+	}
+
+	var response HealthResponse
 	err = decodeResponse(httpResp, &response)
 	if err != nil {
 		return nil, err
