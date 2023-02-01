@@ -110,3 +110,32 @@ func TestDeleteAfterCreate(t *testing.T) {
 		t.Fatalf("\t%s\tShould not respond with error:%s", failed, err)
 	}
 }
+
+func TestListAfterDelete(t *testing.T) {
+	t.Log("Given the need to test the account's List() API")
+	t.Logf("\tWhen creating client of accounts lib")
+	client, err := accounts.New()
+	if err != nil {
+		t.Fatalf("\t%s\tShould not respond with error: %s", failed, err)
+	}
+
+	account := createTestAccount(t, client)
+
+	t.Logf("\tWhen checking the response of Delete() API for AccountID: %s", account.ID)
+	err = client.Delete(account.ID, 0)
+	if err != nil {
+		t.Fatalf("\t%s\tShould not respond with error:%s", failed, err)
+	}
+
+	t.Logf("\tWhen checking the response of List() API")
+	accounts, err := client.List("last")
+	if err != nil {
+		t.Fatalf("\t%s\tShould not respond with error:%s", failed, err)
+	}
+
+	for _, acc := range accounts.Accounts {
+		if acc.ID == account.ID {
+			t.Fatalf("\t%s\tShould not match test account.ID with one of the element in List()", failed)
+		}
+	}
+}
