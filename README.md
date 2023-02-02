@@ -7,6 +7,7 @@ This is a client library in Go to access Form3 fake account API. It provides `Cr
 * [Setup](#setup)
 * [Examples](#examples)
 * [Testing](#testing)
+* [Author](#author)
 
 ---
 
@@ -51,4 +52,9 @@ Setup `ACCOUNTS_API_URL` environement variable to Form3 accounts API server
 
 ## Testing
     docker-compose up
+   
+   
+## Author
+Kumar Sukhani
 
+kumarsukhani@gmail.com
