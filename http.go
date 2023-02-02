@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func encodeRequest(input interface{}) (io.Reader, error) {
@@ -30,6 +31,12 @@ type errorResponse struct {
 }
 
 func decodeResponse(resp *http.Response, result interface{}) error {
+	if !strings.Contains(resp.Header.Get("Content-Type"), "application/json") {
+		err := fmt.Errorf("error: response body is not json, httpStatus: %s", resp.Status)
+		log.Println(err)
+		return err
+	}
+
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		var errResponse errorResponse
 		err := json.NewDecoder(resp.Body).Decode(&errResponse)
