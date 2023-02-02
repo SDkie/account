@@ -12,7 +12,6 @@ const (
 	CREATE_PATH = "%s/v1/organisation/accounts"
 	FETCH_PATH  = "%s/v1/organisation/accounts/%s"
 	DELETE_PATH = "%s/v1/organisation/accounts/%s?version=%d"
-	HEALTH_PATH = "%s/v1/health"
 )
 
 const (
@@ -154,28 +153,4 @@ func (c *Client) Delete(id string, version int) error {
 	}
 
 	return nil
-}
-
-// HealthResponse is the return type for Health API
-type HealthResponse struct {
-	Status string `json:"status"`
-}
-
-// Health returns the health of the API server
-func (c *Client) Health() (*HealthResponse, error) {
-	url := fmt.Sprintf(HEALTH_PATH, c.serverURL)
-
-	httpResp, err := c.httpClient.Get(url)
-	if err != nil {
-		log.Printf("http.Get request failed with err: %s\n", err)
-		return nil, err
-	}
-
-	var response HealthResponse
-	err = decodeResponse(httpResp, &response)
-	if err != nil {
-		return nil, err
-	}
-
-	return &response, nil
 }

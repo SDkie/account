@@ -1,52 +1,15 @@
 package account_test
 
 import (
-	"fmt"
-	"log"
-	"os"
 	"reflect"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/SDkie/account"
 	"github.com/google/uuid"
 )
 
 const failed = "\u2717"
-
-func TestMain(m *testing.M) {
-	client, err := account.New()
-	if err != nil {
-		log.Print(err)
-		os.Exit(1)
-	}
-
-	// Waiting for the API server to be healthy
-	sleepInterval := 10 * time.Millisecond
-	for i := 0; i < 10; i++ {
-		health, err := client.Health()
-		if err != nil {
-			log.Printf("Health checked failed with error: %s", err)
-		} else if health.Status != "up" {
-			err := fmt.Errorf("Health status is not up, Status:%s", health.Status)
-			log.Println(err)
-		}
-
-		if err != nil {
-			log.Printf("Sleeping:%v for Account API to be healthy", sleepInterval)
-			time.Sleep(sleepInterval)
-			sleepInterval *= 2
-			continue
-		}
-
-		// API server is healthy, we are ready to run tests
-		os.Exit(m.Run())
-	}
-
-	log.Printf("exiting as Health API is still not up after 10 retries")
-	os.Exit(1)
-}
 
 func TestCreate(t *testing.T) {
 	t.Log("Given the need to test the account's Create() API")
