@@ -16,7 +16,8 @@ const (
 )
 
 type Client struct {
-	serverURL string
+	serverURL  string
+	httpClient *http.Client
 }
 
 // New returns *Client using ACCOUNTS_API_URL env variable
@@ -34,7 +35,16 @@ func New() (*Client, error) {
 		return nil, err
 	}
 
-	return &Client{serverURL: rURL}, nil
+	client := &Client{
+		serverURL:  rURL,
+		httpClient: http.DefaultClient,
+	}
+
+	return client, nil
+}
+
+func (c *Client) SetHTTPClient(httpClient http.Client) {
+	c.httpClient = &httpClient
 }
 
 // AccountData is the structure for an account
@@ -82,7 +92,7 @@ func (c *Client) Create(data AccountData) (*AccountResponse, error) {
 		return nil, err
 	}
 
-	httpResp, err := http.Post(url, "application/json", reader)
+	httpResp, err := c.httpClient.Post(url, "application/json", reader)
 	if err != nil {
 		log.Printf("http.Post request failed with err: %s\n", err)
 		return nil, err
@@ -101,7 +111,7 @@ func (c *Client) Create(data AccountData) (*AccountResponse, error) {
 func (c *Client) Fetch(id string) (*AccountResponse, error) {
 	url := fmt.Sprintf(FETCH_PATH, c.serverURL, id)
 
-	httpResp, err := http.Get(url)
+	httpResp, err := c.httpClient.Get(url)
 	if err != nil {
 		log.Printf("http.Get request failed with err: %s\n", err)
 		return nil, err
@@ -126,7 +136,7 @@ func (c *Client) Delete(id string, version int) error {
 		return err
 	}
 
-	httpResp, err := http.DefaultClient.Do(req)
+	httpResp, err := c.httpClient.Do(req)
 	if err != nil {
 		log.Printf("Do(req) failed with err: %s\n", err)
 		return err
@@ -150,7 +160,7 @@ type HealthResponse struct {
 func (c *Client) Health() (*HealthResponse, error) {
 	url := fmt.Sprintf(HEALTH_PATH, c.serverURL)
 
-	httpResp, err := http.Get(url)
+	httpResp, err := c.httpClient.Get(url)
 	if err != nil {
 		log.Printf("http.Get request failed with err: %s\n", err)
 		return nil, err
