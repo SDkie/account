@@ -3,6 +3,7 @@ package account
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -45,7 +46,7 @@ func decodeResponse(resp *http.Response, result interface{}) error {
 			return err
 		}
 
-		err = fmt.Errorf("http request failed with err: %s and httpStatus:%s", errResponse.ErrorMessage, resp.Status)
+		err = errors.New(errResponse.ErrorMessage)
 		log.Println(err)
 		return err
 	}

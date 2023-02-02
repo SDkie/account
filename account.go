@@ -15,6 +15,11 @@ const (
 	HEALTH_PATH = "%s/v1/health"
 )
 
+const (
+	ErrDuplicateConstraint = "Account cannot be created as it violates a duplicate constraint"
+	ErrInvalidUUID         = "id is not a valid uuid"
+)
+
 type Client struct {
 	serverURL  string
 	httpClient *http.Client

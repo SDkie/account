@@ -52,19 +52,19 @@ func TestCreate(t *testing.T) {
 	t.Log("Given the need to test the account's Create() API")
 
 	client := getAccountsClient(t)
-	account := createTestAccount(t, client)
-	cleanupTestAccount(t, client, account.ID)
+	accountData := createTestAccount(t, client)
+	cleanupTestAccount(t, client, accountData.ID)
 }
 
 func TestCreateWithoutID(t *testing.T) {
 	t.Log("Given the need to test the account's Create() API Without ID")
 
 	client := getAccountsClient(t)
-	account := generateRandomAccountData()
-	account.ID = ""
+	accountData := generateRandomAccountData()
+	accountData.ID = ""
 
-	t.Logf("\tWhen checking the response of Create() API for AccountID: %s", account.ID)
-	_, err := client.Create(account)
+	t.Logf("\tWhen checking the response of Create() API for AccountID: %s", accountData.ID)
+	_, err := client.Create(accountData)
 	if err == nil {
 		t.Fatalf("\t%s\tShould respond with an error", failed)
 	}
@@ -74,15 +74,33 @@ func TestCreateWithoutID(t *testing.T) {
 	}
 }
 
+func TestCreateWithDuplicateConstraint(t *testing.T) {
+	t.Log("Given the need to test the account's Create() API With Duplicate Constraint")
+
+	client := getAccountsClient(t)
+	accountData := createTestAccount(t, client)
+	defer cleanupTestAccount(t, client, accountData.ID)
+
+	t.Logf("\tWhen checking the response of Create() API for AccountID: %s", accountData.ID)
+	_, err := client.Create(accountData)
+	if err == nil {
+		t.Fatalf("\t%s\tShould respond with an error", failed)
+	}
+
+	if err.Error() != account.ErrDuplicateConstraint {
+		t.Fatalf("\t%s\tShould fail with '%s' error msg", failed, account.ErrDuplicateConstraint)
+	}
+}
+
 func TestFetchAfterCreate(t *testing.T) {
 	t.Log("Given the need to test the account's Fetch() API")
 
 	client := getAccountsClient(t)
-	account := createTestAccount(t, client)
-	defer cleanupTestAccount(t, client, account.ID)
+	accountData := createTestAccount(t, client)
+	defer cleanupTestAccount(t, client, accountData.ID)
 
-	t.Logf("\tWhen checking the response of Fetch() API for AccountID: %s", account.ID)
-	resp, err := client.Fetch(account.ID)
+	t.Logf("\tWhen checking the response of Fetch() API for AccountID: %s", accountData.ID)
+	resp, err := client.Fetch(accountData.ID)
 	if err != nil {
 		t.Fatalf("\t%s\tShould not respond with error:%s", failed, err)
 	}
@@ -90,8 +108,21 @@ func TestFetchAfterCreate(t *testing.T) {
 		t.Fatalf("\t%s\tShould not respond with nil ResponseAccount", failed)
 	}
 
-	if !reflect.DeepEqual(resp.AccountData, account) {
+	if !reflect.DeepEqual(resp.AccountData, accountData) {
 		t.Fatalf("\t%s\tShould match AccountResponse.AccountData with given account", failed)
+	}
+}
+
+func TestFetchWithInvalidID(t *testing.T) {
+	t.Log("Given the need to test the account's Fetch() API with invalid ID")
+
+	client := getAccountsClient(t)
+	_, err := client.Fetch("0")
+	if err == nil {
+		t.Fatalf("\t%s\tShould fail with err", failed)
+	}
+	if err.Error() != account.ErrInvalidUUID {
+		t.Fatalf("\t%s\tShould fail with '%s' error msg", failed, account.ErrInvalidUUID)
 	}
 }
 
@@ -99,10 +130,10 @@ func TestDeleteAfterCreate(t *testing.T) {
 	t.Log("Given the need to test the account's Delete() API")
 
 	client := getAccountsClient(t)
-	account := createTestAccount(t, client)
+	accountData := createTestAccount(t, client)
 
-	t.Logf("\tWhen checking the response of Delete() API for AccountID: %s", account.ID)
-	err := client.Delete(account.ID, 0)
+	t.Logf("\tWhen checking the response of Delete() API for AccountID: %s", accountData.ID)
+	err := client.Delete(accountData.ID, 0)
 	if err != nil {
 		t.Fatalf("\t%s\tShould not respond with error:%s", failed, err)
 	}
@@ -112,16 +143,16 @@ func TestFetchAfterDelete(t *testing.T) {
 	t.Log("Given the need to test the account's Delete() API")
 
 	client := getAccountsClient(t)
-	account := createTestAccount(t, client)
+	accountData := createTestAccount(t, client)
 
-	t.Logf("\tWhen checking the response of Delete() API for AccountID: %s", account.ID)
-	err := client.Delete(account.ID, 0)
+	t.Logf("\tWhen checking the response of Delete() API for AccountID: %s", accountData.ID)
+	err := client.Delete(accountData.ID, 0)
 	if err != nil {
 		t.Fatalf("\t%s\tShould not respond with error:%s", failed, err)
 	}
 
-	t.Logf("\tWhen checking the response of Fetch() API for AccountID: %s", account.ID)
-	_, err = client.Fetch(account.ID)
+	t.Logf("\tWhen checking the response of Fetch() API for AccountID: %s", accountData.ID)
+	_, err = client.Fetch(accountData.ID)
 	if err == nil {
 		t.Fatalf("\t%s\tShould fail with err", failed)
 	}
@@ -159,10 +190,10 @@ func generateRandomAccountData() account.AccountData {
 }
 
 func createTestAccount(t *testing.T, client *account.Client) account.AccountData {
-	account := generateRandomAccountData()
+	accountData := generateRandomAccountData()
 
-	t.Logf("\tWhen checking the response of Create() API for AccountID: %s", account.ID)
-	resp, err := client.Create(account)
+	t.Logf("\tWhen checking the response of Create() API for AccountID: %s", accountData.ID)
+	resp, err := client.Create(accountData)
 	if err != nil {
 		t.Fatalf("\t%s\tShould not respond with error:%s", failed, err)
 	}
@@ -170,11 +201,11 @@ func createTestAccount(t *testing.T, client *account.Client) account.AccountData
 		t.Fatalf("\t%s\tShould not respond with nil ResponseAccount", failed)
 	}
 
-	if !reflect.DeepEqual(resp.AccountData, account) {
+	if !reflect.DeepEqual(resp.AccountData, accountData) {
 		t.Fatalf("\t%s\tShould match AccountResponse.AccountData with given account", failed)
 	}
 
-	return account
+	return accountData
 }
 
 func cleanupTestAccount(t *testing.T, client *account.Client, id string) {
