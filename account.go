@@ -47,6 +47,18 @@ func New() (*Client, error) {
 	return client, nil
 }
 
+func (c *Client) SetServerURL(serverURL string) error {
+	_, err := url.ParseRequestURI(serverURL)
+	if err != nil {
+		err := fmt.Errorf("given serverURL failed parsing with err: %s", err)
+		fmt.Println(err)
+		return err
+	}
+
+	c.serverURL = serverURL
+	return nil
+}
+
 func (c *Client) SetHTTPClient(httpClient http.Client) {
 	c.httpClient = &httpClient
 }

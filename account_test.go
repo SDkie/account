@@ -2,6 +2,7 @@ package account_test
 
 import (
 	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"strings"
 	"testing"
@@ -33,6 +34,33 @@ func TestCreateWithCustomHttpClient(t *testing.T) {
 	cleanupTestAccount(t, client, accountData.ID)
 }
 
+func TestCustomHttpClientForTimeout(t *testing.T) {
+	t.Log("Given the need to test the account's Fetch() API for timeout with custom httpClient")
+
+	mockServer := httptest.NewServer(http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			time.Sleep(2 * time.Second)
+		}))
+
+	var httpClient http.Client
+	httpClient.Timeout = 1 * time.Second
+
+	client := getAccountsClient(t)
+	client.SetHTTPClient(httpClient)
+	client.SetServerURL(mockServer.URL)
+
+	t.Log("\tWhen checking the response of Fetch() API for AccountID: 0")
+	_, err := client.Fetch("0")
+	if err == nil {
+		t.Fatalf("\t%s\tShould respond with an error", failed)
+	}
+
+	expectedErr := "context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+	if !strings.Contains(err.Error(), expectedErr) {
+		t.Fatalf("\t%s\tShould fail with '%s' error msg", failed, expectedErr)
+	}
+}
+
 func TestCreateWithoutID(t *testing.T) {
 	t.Log("Given the need to test the account's Create() API Without ID")
 
@@ -46,8 +74,9 @@ func TestCreateWithoutID(t *testing.T) {
 		t.Fatalf("\t%s\tShould respond with an error", failed)
 	}
 
-	if !strings.Contains(err.Error(), "validation failure list:\nvalidation failure list:\nid in body is required") {
-		t.Fatalf("\t%s\tShould fail with /'id in body is required/' error msg", failed)
+	expectedErr := "validation failure list:\nvalidation failure list:\nid in body is required"
+	if !strings.Contains(err.Error(), expectedErr) {
+		t.Fatalf("\t%s\tShould fail with '%s' error msg", failed, expectedErr)
 	}
 }
 
