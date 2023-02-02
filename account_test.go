@@ -44,7 +44,7 @@ func TestMain(m *testing.M) {
 		os.Exit(m.Run())
 	}
 
-	log.Printf("Exiting as Health API is still not up after 10 retries")
+	log.Printf("exiting as Health API is still not up after 10 retries")
 	os.Exit(1)
 }
 

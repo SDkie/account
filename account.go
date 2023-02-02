@@ -30,7 +30,7 @@ func New() (*Client, error) {
 
 	_, err := url.ParseRequestURI(rURL)
 	if err != nil {
-		log.Printf("Parsing ACCOUNTS_API_URL failed with err: %s", err)
+		log.Printf("parsing ACCOUNTS_API_URL failed with err: %s", err)
 		return nil, err
 	}
 
