@@ -147,6 +147,13 @@ func (c *Client) Delete(id string, version int) error {
 	}
 
 	if httpResp.StatusCode != http.StatusNoContent {
+		if httpResp.ContentLength > 0 {
+			err = decodeResponse(httpResp, nil)
+			if err != nil {
+				return err
+			}
+		}
+
 		err := fmt.Errorf("delete request failed with httpStatus: %s", httpResp.Status)
 		log.Println(err)
 		return err

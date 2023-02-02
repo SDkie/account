@@ -79,8 +79,11 @@ func TestFetchAfterCreate(t *testing.T) {
 func TestFetchWithInvalidID(t *testing.T) {
 	t.Log("Given the need to test the account's Fetch() API with invalid ID")
 
+	id := "0"
+
+	t.Logf("\tWhen checking the response of Fetch() API for AccountID: %s", id)
 	client := getAccountsClient(t)
-	_, err := client.Fetch("0")
+	_, err := client.Fetch(id)
 	if err == nil {
 		t.Fatalf("\t%s\tShould fail with err", failed)
 	}
@@ -99,6 +102,22 @@ func TestDeleteAfterCreate(t *testing.T) {
 	err := client.Delete(accountData.ID, 0)
 	if err != nil {
 		t.Fatalf("\t%s\tShould not respond with error:%s", failed, err)
+	}
+}
+
+func TestDeleteWithInvalidID(t *testing.T) {
+	t.Log("Given the need to test the account's Delete() API with invalid ID")
+
+	id := "0"
+
+	t.Logf("\tWhen checking the response of Delete() API for AccountID: %s", id)
+	client := getAccountsClient(t)
+	err := client.Delete(id, 0)
+	if err == nil {
+		t.Fatalf("\t%s\tShould fail with err", failed)
+	}
+	if err.Error() != account.ErrInvalidUUID {
+		t.Fatalf("\t%s\tShould fail with '%s' error msg", failed, account.ErrInvalidUUID)
 	}
 }
 
