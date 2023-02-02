@@ -1,9 +1,11 @@
 package account_test
 
 import (
+	"net/http"
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/SDkie/account"
 	"github.com/google/uuid"
@@ -15,6 +17,18 @@ func TestCreate(t *testing.T) {
 	t.Log("Given the need to test the account's Create() API")
 
 	client := getAccountsClient(t)
+	accountData := createTestAccount(t, client)
+	cleanupTestAccount(t, client, accountData.ID)
+}
+
+func TestCreateWithCustomHttpClient(t *testing.T) {
+	t.Log("Given the need to test the account's Create() API with custom httpClient")
+
+	client := getAccountsClient(t)
+	var httpClient http.Client
+	httpClient.Timeout = 1 * time.Minute
+	client.SetHTTPClient(httpClient)
+
 	accountData := createTestAccount(t, client)
 	cleanupTestAccount(t, client, accountData.ID)
 }
